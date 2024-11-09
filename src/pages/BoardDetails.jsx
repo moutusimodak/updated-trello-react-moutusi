@@ -1,12 +1,14 @@
 import  { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
-
-const APIKey = import.meta.env.VITE_APIKEY;
-const APIToken = import.meta.env.VITE_TOKEN;
-const BaseUrl = import.meta.env.VITE_BASE_URL
 
 import Lists from "../components/Lists";
+
+import {
+  fetchBoardDetails,
+  fetchBoardLists,
+  createBoardList,
+  deleteBoardList,
+} from "../services/boardDetails";
 
 import {
   Box,
@@ -32,13 +34,11 @@ const BoardDetails = () => {
 
   
   useEffect(() => {
-    const fetchBoardDetails = async () => {
+    const loadBoardDetails = async () => {
       try {
-        await fetchBoardDetails();
-        const response = await axios.get(
-          `${BaseUrl}/boards/${id}?key=${APIKey}&token=${APIToken}`
-        );
-        setBoard(response.data);
+        const boardData = await fetchBoardDetails(id);
+        setBoard(boardData);
+        
       } catch (error) {
         setError(error.message);
       }
@@ -47,12 +47,8 @@ const BoardDetails = () => {
     //Fetching Lists
     const fetchLists = async () => {
       try {
-        const response = await axios.get(
-          `${BaseUrl}/boards/${id}/lists?filter=open&key=${APIKey}&token=${APIToken}`
-        );
-      
-        
-        setLists(response.data);
+        const listsData = await fetchBoardLists(id);
+        setLists(listsData);
       } catch (error) {
         setError(() => error.message);
         setToast({
@@ -63,25 +59,23 @@ const BoardDetails = () => {
       }
     };
 
-    fetchBoardDetails();
+    loadBoardDetails();
     fetchLists();
   }, [id]);
 
 
+  
+
   //Creating List
   const createList = async () => {
     try {
-      const response = await axios.post(
-        `${BaseUrl}/lists?name=${encodeURIComponent(
-          listName
-        )}&idBoard=${id}&key=${APIKey}&token=${APIToken}`
-      );
-      setLists((prevLists) => [...prevLists, response.data]);
+      const newList = await createBoardList(listName, id);
+      setLists((prevLists) => [...prevLists, newList]);
       setListName("");
       setOpenModal(false);
       setToast({
         open: true,
-        message: `List "${response.data.name}" is created successfully.`,
+        message: `List "${newList.name}" created successfully.`,
         severity: "success",
       });
     } catch (error) {
@@ -98,13 +92,11 @@ const BoardDetails = () => {
   //Deleting List
   const deleteList = async (listId) => {
     try {
-      await axios.put(
-        `${BaseUrl}/lists/${listId}/closed?value=true&key=${APIKey}&token=${APIToken}`
-      );
+      await deleteBoardList(listId);
       setLists((prevLists) => prevLists.filter((list) => list.id !== listId));
       setToast({
         open: true,
-        message: "The list is deleted successfully.",
+        message: "List deleted successfully.",
         severity: "success",
       });
     } catch (error) {

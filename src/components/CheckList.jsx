@@ -1,9 +1,6 @@
 import  { useEffect, useState } from "react";
-import axios from "axios";
 
-const APIKey = import.meta.env.VITE_APIKEY;
-const APIToken = import.meta.env.VITE_TOKEN;
-const BaseUrl = import.meta.env.VITE_BASE_URL;
+import { getCheckLists, createCheckList, deleteCheckList } from "../services/checkListService";
 
 import CheckListItems from "./CheckListItems";
 
@@ -38,10 +35,8 @@ const CheckList = ({ cardId }) => {
   useEffect(() => {
     const fetchCheckLists = async () => {
       try {
-        const response = await axios.get(
-          `${BaseUrl}/cards/${cardId}/checklists?key=${APIKey}&token=${APIToken}`
-        );
-        setCheckLists(response.data);
+        const data = await getCheckLists(cardId); 
+        setCheckLists(data);
       } catch (error) {
         setError(error.message);
         setSnackbarOpen(true);
@@ -57,11 +52,9 @@ const CheckList = ({ cardId }) => {
     if (!newCheckListName) return;
 
     try {
-      const response = await axios.post(
-        `${BaseUrl}/cards/${cardId}/checklists?key=${APIKey}&token=${APIToken}`,
-        { name: newCheckListName }
-      );
-      setCheckLists((prevLists) => [...prevLists, response.data]);
+      const newCheckList = await createCheckList(cardId, newCheckListName); 
+      setCheckLists((prevLists) => [...prevLists, newCheckList]);
+
       setNewCheckListName("");
       setIsInputVisible(false);
     } catch (error) {
@@ -71,14 +64,10 @@ const CheckList = ({ cardId }) => {
   };
 
   //Deleting CheckList
-  const deleteCheckList = async (checkListId) => {
+  const deleteCheckListHandler = async (checkListId) => {
     try {
-      await axios.delete(
-        `${BaseUrl}/checklists/${checkListId}?key=${APIKey}&token=${APIToken}`
-      );
-      setCheckLists((prevLists) =>
-        prevLists.filter((list) => list.id !== checkListId)
-      );
+      await deleteCheckList(checkListId); 
+      setCheckLists((prevLists) => prevLists.filter((list) => list.id !== checkListId));
     } catch (error) {
       setError(error.message);
       setSnackbarOpen(true);
@@ -116,7 +105,7 @@ const CheckList = ({ cardId }) => {
                   <IconButton
                     edge="end"
                     color="error"
-                    onClick={() => deleteCheckList(checkList.id)}
+                    onClick={() => deleteCheckListHandler(checkList.id)}
                   >
                     <DeleteIcon />
                   </IconButton>

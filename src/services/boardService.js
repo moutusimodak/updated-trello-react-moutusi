@@ -1,12 +1,12 @@
 
 import { getData, postData } from "../api/api";
 
-const APIKey = import.meta.env.VITE_APIKEY;
-const APIToken = import.meta.env.VITE_TOKEN;
-const BaseUrl = import.meta.env.VITE_BASE_URL;
+import config from "../config/index"; 
+
+const { apiKey, apiToken, baseUrl } = config;
 
 export const fetchBoards = async () => {
-  const endpoint = `${BaseUrl}/members/me/boards?key=${APIKey}&token=${APIToken}`;
+  const endpoint = `${baseUrl}/members/me/boards?key=${apiKey}&token=${apiToken}`;
   try {
     return await getData(endpoint);
   } catch (error) {
@@ -15,7 +15,7 @@ export const fetchBoards = async () => {
 };
 
 export const addBoard = async (boardName, bgColor) => {
-  const endpoint = `${BaseUrl}/boards/?key=${APIKey}&token=${APIToken}`;
+  const endpoint = `${baseUrl}/boards/?key=${apiKey}&token=${apiToken}`;
   const payload = {
     name: boardName,
     prefs_background: bgColor,

@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 
-const APIKey = import.meta.env.VITE_APIKEY;
-const APIToken = import.meta.env.VITE_TOKEN;
-const BaseUrl = import.meta.env.VITE_BASE_URL;
+
+import {
+  fetchCheckItems,
+  createCheckItem,
+  updateCheckItemStatus,
+  deleteCheckItem,
+} from "../services/checkListItemService";
 
 import {
   Box,
@@ -24,28 +27,25 @@ const CheckListItems = ({ checkListId, cardId }) => {
   const [itemName, setItemName] = useState("");
 
   useEffect(() => {
-    const fetchCheckItems = async () => {
+    const loadCheckItems = async () => {
       try {
-        const response = await axios.get(
-          `${BaseUrl}/checklists/${checkListId}/checkItems?key=${APIKey}&token=${APIToken}`
-        );
-        setCheckItems(response.data);
+        const data = await fetchCheckItems(checkListId);
+        setCheckItems(data);
       } catch (error) {
         setError("Error fetching checklist items.");
       }
     };
 
-    fetchCheckItems();
+    loadCheckItems();
   }, [checkListId]);
 
   const createCheckListItem = async () => {
     if (!itemName) return;
 
     try {
-      const response = await axios.post(
-        `${BaseUrl}/checklists/${checkListId}/checkItems?name=${itemName}&key=${APIKey}&token=${APIToken}`
-      );
-      setCheckItems((prevList) => [...prevList, response.data]);
+      const newItem = await createCheckItem(checkListId, itemName);
+      setCheckItems((prevList) => [...prevList, newItem]);
+
       setItemName("");
     } catch (error) {
       setError("Error creating checklist item.");
@@ -54,12 +54,9 @@ const CheckListItems = ({ checkListId, cardId }) => {
 
   const deleteCheckListItem = async (checkItemId) => {
     try {
-      await axios.delete(
-        `${BaseUrl}/checklists/${checkListId}/checkItems/${checkItemId}?key=${APIKey}&token=${APIToken}`
-      );
-      setCheckItems((prevList) =>
-        prevList.filter((item) => item.id !== checkItemId)
-      );
+          await deleteCheckItem(checkListId, checkItemId);
+      setCheckItems((prevList) => prevList.filter((item) => item.id !== checkItemId));
+
     } catch (error) {
       setError("Error deleting checklist item.");
     }
@@ -67,12 +64,7 @@ const CheckListItems = ({ checkListId, cardId }) => {
 
   const updateCheckListItemStatus = async (checkItemId, newStatus) => {
     try {
-      await axios.put(
-        `${BaseUrl}/cards/${cardId}/checkItem/${checkItemId}?state=${
-          newStatus ? "complete" : "incomplete"
-        }&key=${APIKey}&token=${APIToken}`
-      );
-
+       await updateCheckItemStatus(cardId, checkItemId, newStatus);
       setCheckItems((prevList) =>
         prevList.map((item) =>
           item.id === checkItemId

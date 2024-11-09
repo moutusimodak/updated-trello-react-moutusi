@@ -1,14 +1,10 @@
 import  { useEffect, useState } from "react";
-import axios from "axios";
-
-
-const APIKey = import.meta.env.VITE_APIKEY;
-const APIToken = import.meta.env.VITE_TOKEN;
-const BaseUrl = import.meta.env.VITE_BASE_URL;
-
 
 import Cards from "./Cards";
 import CheckList from "./CheckList";
+
+
+import { fetchListCards, deleteListCard } from "../services/listsService";
 
 
 import {
@@ -38,12 +34,8 @@ const Lists = ({ list, onDelete, loading }) => {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const response = await axios.get(
-          `${BaseUrl}/lists/${list.id}/cards?key=${APIKey}&token=${APIToken}`
-        );
-       
-
-        setCards(response.data);
+        const cardsData = await fetchListCards(list.id);
+        setCards(cardsData);
       } catch (error) {
         setError(error.message);
       }
@@ -56,9 +48,7 @@ const Lists = ({ list, onDelete, loading }) => {
   //Deleting Card
   const deleteCard = async (cardId) => {
     try {
-      await axios.delete(
-        `${BaseUrl}/cards/${cardId}?key=${APIKey}&token=${APIToken}`
-      );
+      await deleteListCard(cardId);
       setCards((prevCards) => prevCards.filter((card) => card.id !== cardId));
     } catch (error) {
       setError(error.message);
@@ -86,7 +76,7 @@ const Lists = ({ list, onDelete, loading }) => {
         <CardHeader
           title={list.name}
           action={
-            <IconButton onClick={() => onDelete(list.id)} disabled={loading}>
+            <IconButton onClick={()=>onDelete(list.id)} disabled={loading}>
               <CloseIcon />
             </IconButton>
           }

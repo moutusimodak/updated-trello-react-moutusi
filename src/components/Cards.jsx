@@ -1,9 +1,6 @@
 import  { useState } from "react";
-import axios from "axios";
 
-const APIKey = import.meta.env.VITE_APIKEY;
-const APIToken = import.meta.env.VITE_TOKEN;
-const BaseUrl = import.meta.env.VITE_BASE_URL
+import { createCard } from "../services/cardsService"; 
 
 import {
   Button,
@@ -21,12 +18,10 @@ const Cards = ({ id, setCards }) => {
 
 
   //Creating card
-  const createCard = async () => {
+  const handleCreateCard = async () => {
     try {
-      const response = await axios.post(
-        `${BaseUrl}/cards?name=${encodeURIComponent(cardName)}&idList=${id}&key=${APIKey}&token=${APIToken}`
-      );
-      setCards((prevCards) => [...prevCards, response.data]);
+      const newCard = await createCard(cardName, id); 
+      setCards((prevCards) => [...prevCards, newCard]);
       setError(null);
       setIsInputVisible(false);
       setCardName("");
@@ -63,7 +58,7 @@ const Cards = ({ id, setCards }) => {
           />
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Button
-            onClick={createCard}
+            onClick={handleCreateCard}
             variant="contained"
             color="primary"
           >

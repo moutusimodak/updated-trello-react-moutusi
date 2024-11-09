@@ -1,4 +1,3 @@
-
 import axios from "axios";
 
 export const getData = async (endpoint) => {
@@ -10,14 +9,28 @@ export const getData = async (endpoint) => {
   }
 };
 
-
-
 export const postData = async (endpoint, payload) => {
-    try {
-      const response = await axios.post(endpoint, payload);
-      return response.data;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  };
+  try {
+    const response = await axios.post(endpoint, payload);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
+export const putData = async (endpoint) => {
+  try {
+    const response = await axios.put(endpoint);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const deleteData = async (endpoint) => {
+  try {
+    await axios.delete(endpoint);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
